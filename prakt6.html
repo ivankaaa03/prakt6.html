@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-do List – Практична 6</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f3f4f6;
+        color: #1e293b;
+        margin: 0;
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      h1 {
+        color: #2563eb;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+      input,
+      button {
+        padding: 0.7rem;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      button {
+        background: #2563eb;
+        color: #fff;
+        cursor: pointer;
+        margin-top: 0.8rem;
+        border: none;
+      }
+      button:hover {
+        background: #1e40af;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+        text-align: left;
+      }
+      li {
+        background: #f9fafb;
+        padding: 0.7rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      li.done {
+        text-decoration: line-through;
+        color: #9ca3af;
+        background: #e5e7eb;
+      }
+      .actions button {
+        background: #10b981;
+        border: none;
+        color: #fff;
+        margin-left: 0.3rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+      .actions button.delete {
+        background: #ef4444;
+      }
+      .actions button:hover {
+        opacity: 0.85;
+      }
+      #todoApp {
+        display: none;
+      }
+      .logout {
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        margin-top: 0.8rem;
+        cursor: pointer;
+      }
+      .logout:hover {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Екран входу -->
+    <div id="loginScreen" class="container">
+      <h1>Вхід у To-do List</h1>
+      <input type="text" id="usernameInput" placeholder="Введіть ваше ім'я" />
+      <button onclick="login()">Увійти</button>
+    </div>
+
+    <!-- Основний To-do застосунок -->
+    <div id="todoApp" class="container">
+      <h1 id="greeting"></h1>
+      <div>
+        <input type="text" id="taskInput" placeholder="Нове завдання..." />
+        <button onclick="addTask()">Додати</button>
+      </div>
+      <ul id="taskList"></ul>
+      <button class="logout" onclick="logout()">Вийти</button>
+    </div>
+
+    <script>
+      let tasks = [];
+      let username = localStorage.getItem("username") || "";
+
+      function renderTasks() {
+        const list = document.getElementById("taskList");
+        list.innerHTML = tasks
+          .map(
+            (t, i) => `
+  <li class="${t.done ? "done" : ""}">
+   <span onclick="toggleDone(${i})">${t.text}</span>
+   <div class="actions">
+    <button onclick="toggleDone(${i})">${t.done ? "↩️" : "✔️"}</button>
+    <button class="delete" onclick="deleteTask(${i})">🗑️</button>
+   </div>
+  </li>`
+          )
+          .join("");
+        localStorage.setItem("tasks_" + username, JSON.stringify(tasks));
+      }
+
+      function addTask() {
+        const input = document.getElementById("taskInput");
+        const text = input.value.trim();
+        if (!text) return alert("Введіть завдання!");
+        tasks.push({ text, done: false });
+        input.value = "";
+        renderTasks();
+      }
+
+      function toggleDone(i) {
+        tasks[i].done = !tasks[i].done;
+        renderTasks();
+      }
+
+      function deleteTask(i) {
+        tasks.splice(i, 1);
+        renderTasks();
+      }
+
+      function login() {
+        const name = document.getElementById("usernameInput").value.trim();
+        if (!name) return alert("Введіть ім’я!");
+        username = name;
+        localStorage.setItem("username", name);
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("todoApp").style.display = "block";
+        document.getElementById("greeting").textContent =
+          "Привіт, " + username + "!";
+        loadUserTasks();
+      }
+
+      function logout() {
+        localStorage.removeItem("username");
+        document.getElementById("todoApp").style.display = "none";
+        document.getElementById("loginScreen").style.display = "block";
+      }
+
+      function loadUserTasks() {
+        tasks = JSON.parse(localStorage.getItem("tasks_" + username) || "[]");
+        renderTasks();
+      }
+
+      window.onload = () => {
+        if (username) {
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("todoApp").style.display = "block";
+          document.getElementById("greeting").textContent =
+            "Привіт, " + username + "!";
+          loadUserTasks();
+        }
+      };
+    </script>
+  </body>
+</html>
